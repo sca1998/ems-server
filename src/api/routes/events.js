@@ -15,7 +15,7 @@ module.exports = router => {
   })
 
   router.route('/events/:id').get(auth(true), async (req, res) => {
-    const event = await EventService.getEvents(req.params.id, req.user)
+    const event = await EventService.getEvent(req.params.id, req.user)
     res.status(200).send({ event })
   })
 

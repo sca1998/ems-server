@@ -7,7 +7,7 @@ class EventService {
   getEvents = async (user = {}) => {
     const events = await Event
       .find({ $or: [ { type: 'public' }, { creator: user._id } ] })
-      .select('title startsAt location type creator attenders')
+      .select('title startsAt endsAt location type creator attenders')
       .populate('creator', 'alias')
       .lean()
     
@@ -31,12 +31,14 @@ class EventService {
     return event
   }
 
-  getEvent = async (_id, user) => {
+  getEvent = async (_id, user = {}) => {
     const event = await Event
-      .findById(_id)
+      .findOne({ _id, $or: [ { type: 'public' }, { creator: user._id } ] })
       .populate('creator', 'alias')
       .lean()
     
+    if (!event) throw new ResponseError(404, 'event not found') 
+
     if (user && user._id) {
       const joinedByUser = !!event.attenders.find(a => a.equals(user._id))
       event.joined = joinedByUser
